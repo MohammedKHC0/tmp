@@ -1,0 +1,3 @@
+setBinding(new Binding([gradle: this]))
+evaluate(new File(settingsDir,
+        'terminal_view/.android/include_flutter.groovy'))

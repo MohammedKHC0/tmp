@@ -19,16 +19,44 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.ramcosta.composedestinations.annotation.Destination
+import com.ramcosta.composedestinations.annotation.RootGraph
+import com.ramcosta.composedestinations.annotation.parameters.NavHostParam
+import com.ramcosta.composedestinations.generated.destinations.ProjectOpenerDestination
+import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+
+@Composable
+@Destination<RootGraph>(start = true)
+fun Home(
+    modifier: Modifier = Modifier,
+    navigator: DestinationsNavigator,
+    @NavHostParam
+    appViewModel: AppViewModel,
+) {
+    HomeContent(
+        modifier = modifier,
+        navigator = navigator,
+        appViewModel = appViewModel,
+    )
+}
 
 @Composable
 @Preview
-fun Home(modifier: Modifier = Modifier) {
+fun HomeContent(
+    modifier: Modifier = Modifier,
+    navigator: DestinationsNavigator? = null,
+    appViewModel: AppViewModel? = null,
+) {
+    appViewModel?.setAppTitle("Home")
+
     Surface(modifier = modifier) {
         Column(
             modifier = Modifier.fillMaxSize(),
@@ -53,10 +81,17 @@ fun Home(modifier: Modifier = Modifier) {
                     .fillMaxWidth()
                     .height(70.dp)
 
+                val setupCompleted = if (appViewModel == null) {
+                    true
+                } else {
+                    val inner by appViewModel.setupCompleted.collectAsState()
+                    inner
+                }
+
                 MenuCard(
                     modifier = cardModifier,
                     title = "Project",
-                    description = "open or create a Project",
+                    description = "open or create a project",
                     icon = {
                         Icon(
                             imageVector = ImageVector.vectorResource(id = R.drawable.open_in_new_icon),
@@ -64,8 +99,10 @@ fun Home(modifier: Modifier = Modifier) {
                         )
                     },
                     onClick = {
-                        /* TODO */
-                    })
+                        navigator?.navigate(ProjectOpenerDestination)
+                    },
+                    enabled = setupCompleted
+                )
 
                 Spacer(modifier = Modifier.height(10.dp))
 
@@ -81,7 +118,9 @@ fun Home(modifier: Modifier = Modifier) {
                     },
                     onClick = {
                         /* TODO */
-                    })
+                    },
+                    enabled = setupCompleted
+                )
 
                 Spacer(modifier = Modifier.height(10.dp))
 
@@ -97,7 +136,9 @@ fun Home(modifier: Modifier = Modifier) {
                     },
                     onClick = {
                         /* TODO */
-                    })
+                    },
+                    enabled = setupCompleted
+                )
             }
         }
     }
@@ -108,7 +149,7 @@ fun Home(modifier: Modifier = Modifier) {
 fun MenuCard(
     modifier: Modifier = Modifier,
     title: String = "PreviewCard",
-    description: String = "talk",
+    description: String = "preview",
     icon: @Composable () -> Unit = {
         Icon(
             imageVector = Icons.Default.CheckCircle,
@@ -116,8 +157,9 @@ fun MenuCard(
         )
     },
     onClick: () -> Unit = {},
+    enabled: Boolean = true
 ) {
-    Card(modifier = modifier, onClick = onClick) {
+    Card(modifier = modifier, onClick = onClick, enabled = enabled) {
         Row(
             modifier = Modifier
                 .padding(15.dp)

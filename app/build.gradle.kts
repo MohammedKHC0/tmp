@@ -1,17 +1,23 @@
 plugins {
+    alias(libs.plugins.rust)
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
-    id("com.google.devtools.ksp") version "1.9.22-1.0.17"
+    id("com.google.devtools.ksp") version "1.9.0-1.0.13"
+    kotlin("plugin.serialization") version "2.0.0"
 }
 
 android {
     namespace = "com.shadow3.codroid"
     compileSdk = 34
+    ndkVersion = "27.0.12077973"
+
+    dataBinding.enable = true
 
     defaultConfig {
         applicationId = "com.shadow3.codroid"
-        minSdk = 29
-        targetSdk = 34
+        minSdk = 26
+        //noinspection ExpiredTargetSdkVersion
+        targetSdk = 28
         versionCode = 1
         versionName = "1.0"
 
@@ -19,11 +25,24 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
+
+        ndk {
+            abiFilters.clear()
+            //noinspection ChromeOsAbiSupport
+            abiFilters += listOf("arm64-v8a")
+        }
+    }
+
+    sourceSets {
+        getByName("main") {
+            resources.srcDirs(layout.buildDirectory.get().dir("rustJniLibs/android"))
+        }
     }
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -31,11 +50,14 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "17"
+    }
+    kotlin {
+        jvmToolchain(17)
     }
     buildFeatures {
         compose = true
@@ -50,7 +72,37 @@ android {
     }
 }
 
+cargo {
+    module = "../rust"
+    libname = "rust"
+    targets = listOf("arm64")
+    profile = "release"
+}
+
+tasks.whenTaskAdded {
+    if (name == "javaPreCompileDebug" || name == "javaPreCompileRelease") {
+        dependsOn("cargoBuild")
+    }
+}
+
 dependencies {
+    implementation(project(":flutter"))
+    implementation(libs.sora.editor)
+    implementation(libs.sora.editor.lsp)
+    implementation(libs.compose.webview)
+    implementation(libs.androidx.annotation)
+    implementation(libs.kotlinx.serialization.json)
+    implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.room.ktx)
+    implementation(libs.material)
+    implementation(libs.androidx.appcompat)
+    implementation(libs.androidx.constraintlayout)
+    implementation(libs.androidx.navigation.fragment.ktx)
+    implementation(libs.androidx.navigation.ui.ktx)
+    implementation(libs.androidx.activity)
+    ksp(libs.androidx.room.compiler)
+    implementation(libs.compose.destinations.core)
+    ksp(libs.compose.destinations.ksp)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -66,4 +118,5 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+    implementation(kotlin("reflect"))
 }
