@@ -1,5 +1,7 @@
 package com.shadow3.codroid.composable
 
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -14,11 +16,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardColors
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ShapeDefaults
-import androidx.compose.material3.Shapes
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -41,9 +40,12 @@ import kotlin.io.path.isDirectory
 @Composable
 fun DirectoryFilesList(
     modifier: Modifier = Modifier,
+    contentColor: Color = MaterialTheme.colorScheme.onSurface,
+    containerColor: Color = MaterialTheme.colorScheme.secondaryContainer,
     viewModel: DirectoryFilesListViewModel = viewModel(),
     path: String,
     onClick: (Path) -> Unit = {},
+    onLongClick: (Path) -> Unit = {}
 ) {
     viewModel.initWatching(context = LocalContext.current, path = path)
     val fileList by viewModel.fileList.collectAsState()
@@ -53,33 +55,40 @@ fun DirectoryFilesList(
                 modifier = Modifier
                     .height(60.dp)
                     .fillMaxWidth(),
+                contentColor = contentColor,
+                containerColor = containerColor,
                 path = path,
                 metaInfo = null,
-                onClick = {
-                    onClick(path)
-                },
+                onClick = onClick,
+                onLongClick = onLongClick
             )
         }
     }
 }
 
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 @Preview(heightDp = 60, widthDp = 200)
 fun PathCard(
     modifier: Modifier = Modifier,
     path: Path = Path(path = "/root"),
     metaInfo: String? = null,
-    contentColor: Color = MaterialTheme.colorScheme.onSurface,
+    contentColor: Color = MaterialTheme.colorScheme.onSecondaryContainer,
     containerColor: Color = MaterialTheme.colorScheme.secondaryContainer,
     onClick: (Path) -> Unit = {},
+    onLongClick: (Path) -> Unit = {}
 ) {
-    Card(modifier = modifier, shape = RectangleShape, colors = CardColors(
-        containerColor = containerColor,
-        contentColor = contentColor,
-        disabledContentColor = Color.Unspecified,
-        disabledContainerColor = Color.Unspecified
-    ), onClick = { onClick(path) }) {
+    Card(
+        modifier = modifier.combinedClickable(
+            onClick = { onClick(path) },
+            onLongClick = { onLongClick(path) }), shape = RectangleShape, colors = CardColors(
+            containerColor = containerColor,
+            contentColor = contentColor,
+            disabledContentColor = Color.Unspecified,
+            disabledContainerColor = Color.Unspecified
+        )
+    ) {
         Row(
             modifier = Modifier
                 .fillMaxSize()

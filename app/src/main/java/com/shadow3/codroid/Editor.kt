@@ -41,7 +41,10 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -67,6 +70,7 @@ import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.android.FlutterActivityLaunchConfigs
 import io.flutter.plugin.common.MethodChannel
 import kotlinx.coroutines.launch
+import kotlin.io.path.isDirectory
 
 @Destination<RootGraph>
 @Composable
@@ -133,6 +137,11 @@ fun EditorContent(
     }
 }
 
+private enum class SelectedFilesList {
+    Left,
+    Right,
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BottomSheet(
@@ -156,7 +165,7 @@ fun BottomSheet(
                 selectedTabIndex = pagerState.currentPage,
             ) {
                 Tab(text = {
-                    Text(text = "terminal")
+                    Text(text = "Terminal")
                 }, selected = pagerState.currentPage == 0, onClick = {
                     scope.launch {
                         pagerState.animateScrollToPage(0)
@@ -164,7 +173,7 @@ fun BottomSheet(
                 })
 
                 Tab(text = {
-                    Text(text = "opened files")
+                    Text(text = "Opened")
                 }, selected = pagerState.currentPage == 1, onClick = {
                     scope.launch {
                         pagerState.animateScrollToPage(1)
@@ -172,7 +181,7 @@ fun BottomSheet(
                 })
 
                 Tab(text = {
-                    Text(text = "project")
+                    Text(text = "Project")
                 }, selected = pagerState.currentPage == 2, onClick = {
                     scope.launch {
                         pagerState.animateScrollToPage(2)
@@ -221,27 +230,90 @@ fun BottomSheet(
                                             .fillMaxWidth(),
                                         path = path,
                                         contentColor = MaterialTheme.colorScheme.primary,
-                                        containerColor = MaterialTheme.colorScheme.primaryContainer,
+                                        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
                                         onClick = {
                                             viewModel.openFile(context = context, path = path)
                                         })
                                 } else {
                                     PathCard(modifier = Modifier
                                         .height(60.dp)
-                                        .fillMaxWidth(), path = path, onClick = {
-                                        viewModel.openFile(context = context, path = path)
-                                    })
+                                        .fillMaxWidth(),
+                                        containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+                                        contentColor = MaterialTheme.colorScheme.secondary,
+                                        path = path,
+                                        onClick = {
+                                            viewModel.openFile(context = context, path = path)
+                                        })
                                 }
                             }
                         }
                     }
 
                     2 -> {
-                        DirectoryFilesList(modifier = Modifier.fillMaxSize(),
+                        var selectedFilesList by remember {
+                            mutableStateOf(SelectedFilesList.Left)
+                        }
+
+                        val leftPathCardContainerColor: Color
+                        val leftPathCardContentColor: Color
+                        val rightPathCardContainerColor: Color
+                        val rightPathCardContentColor: Color
+                        when (selectedFilesList) {
+                            SelectedFilesList.Left -> {
+                                leftPathCardContainerColor =
+                                    MaterialTheme.colorScheme.surfaceContainerHigh
+                                leftPathCardContentColor = MaterialTheme.colorScheme.onSurface
+                                rightPathCardContainerColor =
+                                    MaterialTheme.colorScheme.surfaceContainerLow
+                                rightPathCardContentColor = MaterialTheme.colorScheme.secondary
+                            }
+
+                            SelectedFilesList.Right -> {
+                                leftPathCardContainerColor =
+                                    MaterialTheme.colorScheme.surfaceContainerLow
+                                leftPathCardContentColor = MaterialTheme.colorScheme.secondary
+                                rightPathCardContainerColor =
+                                    MaterialTheme.colorScheme.surfaceContainerHigh
+                                rightPathCardContentColor = MaterialTheme.colorScheme.onSurface
+                            }
+                        }
+
+                        DirectoryFilesList(modifier = Modifier
+                            .fillMaxWidth(0.5f)
+                            .fillMaxHeight(),
                             path = projectInfo.path,
-                            onClick = {
-                                viewModel.openFile(context = context, path = it)
+                            contentColor = leftPathCardContentColor,
+                            containerColor = leftPathCardContainerColor,
+                            onClick = { path ->
+                                selectedFilesList = SelectedFilesList.Left
+                                if (path.isDirectory()) {
+
+                                } else {
+                                    viewModel.openFile(context = context, path = path)
+                                }
+                            },
+                            onLongClick = {
+                                selectedFilesList = SelectedFilesList.Left
                             })
+
+                        DirectoryFilesList(modifier = Modifier
+                            .fillMaxWidth(0.5f)
+                            .fillMaxHeight(),
+                            path = projectInfo.path,
+                            contentColor = rightPathCardContentColor,
+                            containerColor = rightPathCardContainerColor,
+                            onClick = { path ->
+                                selectedFilesList = SelectedFilesList.Right
+                                if (path.isDirectory()) {
+
+                                } else {
+                                    viewModel.openFile(context = context, path = path)
+                                }
+                            },
+                            onLongClick = {
+                                selectedFilesList = SelectedFilesList.Right
+                            }
+                        )
                     }
 
                     else -> {
