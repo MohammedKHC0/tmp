@@ -7,4 +7,5 @@ class NativeInotifyHelper {
         2: path don't exist
      */
     external fun waitUntilUpdate(path: String): Int
+    external fun waitUntilUpdateTimeout(path: String, timeoutMillis: Int): Boolean
 }

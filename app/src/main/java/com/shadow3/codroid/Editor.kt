@@ -278,16 +278,19 @@ fun BottomSheet(
                             }
                         }
 
+                        val leftFilesListPath by viewModel.leftFilesListPath.collectAsState()
+                        val rightFilesListPath by viewModel.rightFilesListPath.collectAsState()
+
                         DirectoryFilesList(modifier = Modifier
                             .fillMaxWidth(0.5f)
                             .fillMaxHeight(),
-                            path = projectInfo.path,
+                            path = leftFilesListPath.toString(),
                             contentColor = leftPathCardContentColor,
                             containerColor = leftPathCardContainerColor,
                             onClick = { path ->
                                 selectedFilesList = SelectedFilesList.Left
                                 if (path.isDirectory()) {
-
+                                    viewModel.setLeftFilesPath(path = path)
                                 } else {
                                     viewModel.openFile(context = context, path = path)
                                 }
@@ -299,13 +302,13 @@ fun BottomSheet(
                         DirectoryFilesList(modifier = Modifier
                             .fillMaxWidth(0.5f)
                             .fillMaxHeight(),
-                            path = projectInfo.path,
+                            path = rightFilesListPath.toString(),
                             contentColor = rightPathCardContentColor,
                             containerColor = rightPathCardContainerColor,
                             onClick = { path ->
                                 selectedFilesList = SelectedFilesList.Right
                                 if (path.isDirectory()) {
-
+                                    viewModel.setRightFilesPath(path = path)
                                 } else {
                                     viewModel.openFile(context = context, path = path)
                                 }

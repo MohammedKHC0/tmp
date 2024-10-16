@@ -20,8 +20,10 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -31,7 +33,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.shadow3.codroid.R
 import java.nio.file.Path
 import kotlin.io.path.Path
@@ -42,14 +43,35 @@ fun DirectoryFilesList(
     modifier: Modifier = Modifier,
     contentColor: Color = MaterialTheme.colorScheme.onSurface,
     containerColor: Color = MaterialTheme.colorScheme.secondaryContainer,
-    viewModel: DirectoryFilesListViewModel = viewModel(),
     path: String,
     onClick: (Path) -> Unit = {},
     onLongClick: (Path) -> Unit = {}
 ) {
-    viewModel.initWatching(context = LocalContext.current, path = path)
-    val fileList by viewModel.fileList.collectAsState()
+    val state = remember {
+        DirectoryFilesState()
+    }
+    val context = LocalContext.current
+    LaunchedEffect(path) {
+        state.setFileListPath(context = context, path = Path(path))
+    }
+
+    val fileList by state.filesList.collectAsState()
+    val fileListPath by state.filesListPath.collectAsState()
     LazyColumn(modifier = modifier) {
+        item {
+            PathCard(
+                modifier = Modifier
+                    .height(60.dp)
+                    .fillMaxWidth(),
+                contentColor = contentColor,
+                containerColor = containerColor,
+                path = fileListPath?.resolve("..") ?: Path(".."),
+                metaInfo = null,
+                onClick = onClick,
+                onLongClick = onLongClick
+            )
+        }
+
         items(items = fileList) { path ->
             PathCard(
                 modifier = Modifier

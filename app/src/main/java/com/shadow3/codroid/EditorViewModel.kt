@@ -2,6 +2,7 @@ package com.shadow3.codroid
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -18,6 +19,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import java.nio.file.Path
+import kotlin.io.path.Path
 import kotlin.io.path.readText
 
 class EditorViewModel(private val projectInfo: ProjectInfo) : ViewModel() {
@@ -32,13 +34,20 @@ class EditorViewModel(private val projectInfo: ProjectInfo) : ViewModel() {
     private val _altState = MutableStateFlow(false)
     val altState: StateFlow<Boolean> = _altState
 
+    private val _leftFilesListPath = MutableStateFlow(Path(path = projectInfo.path))
+    val leftFilesListPath: StateFlow<Path> = _leftFilesListPath
+
+    private val _rightFilesListPath = MutableStateFlow(Path(path = projectInfo.path))
+    val rightFilesListPath: StateFlow<Path> = _rightFilesListPath
+
     @SuppressLint("StaticFieldLeak")
     var editor: CodeEditor? = null
 
     private var _currentOpenedFile: MutableStateFlow<Path?> = MutableStateFlow(null)
     val currentOpenedFile: StateFlow<Path?> = _currentOpenedFile
 
-    private var _editorStates: MutableStateFlow<HashMap<Path, CodeEditorState>> = MutableStateFlow(HashMap())
+    private var _editorStates: MutableStateFlow<HashMap<Path, CodeEditorState>> =
+        MutableStateFlow(HashMap())
     val editorStates: StateFlow<HashMap<Path, CodeEditorState>> = _editorStates
 
     var editorState by mutableStateOf(
@@ -115,6 +124,18 @@ class EditorViewModel(private val projectInfo: ProjectInfo) : ViewModel() {
         }
 
         _currentOpenedFile.value = path
+    }
+
+    fun setLeftFilesPath(path: Path) {
+        if (path.normalize().startsWith(Path(path = projectInfo.path).normalize()))
+            _leftFilesListPath.value = path
+    }
+
+    fun setRightFilesPath(path: Path) {
+        if (path.normalize().startsWith(Path(path = projectInfo.path).normalize())) {
+            Log.d("file list", "open dir")
+            _rightFilesListPath.value = path
+        }
     }
 }
 
