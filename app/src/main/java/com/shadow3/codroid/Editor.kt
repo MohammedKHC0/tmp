@@ -65,7 +65,6 @@ import com.shadow3.codroid.composable.CodeEditor
 import com.shadow3.codroid.composable.DirectoryFilesList
 import com.shadow3.codroid.composable.PathCard
 import com.shadow3.codroid.data.ProjectInfo
-import com.shadow3.codroid.data.ProjectType
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.android.FlutterActivityLaunchConfigs
 import io.flutter.plugin.common.MethodChannel
@@ -80,7 +79,6 @@ fun Editor(
     @NavHostParam terminalMethodChannel: MethodChannel,
 ) {
     EditorContent(
-        projectInfo = projectInfo,
         viewModel = viewModel(factory = EditorViewModelFactory(projectInfo = projectInfo)),
         localActivityManager = localActivityManager,
         terminalMethodChannel = terminalMethodChannel
@@ -89,9 +87,6 @@ fun Editor(
 
 @Composable
 fun EditorContent(
-    projectInfo: ProjectInfo = ProjectInfo(
-        "Kotlin", "preview", ProjectType.Kotlin, "/sdcard"
-    ),
     viewModel: EditorViewModel,
     localActivityManager: LocalActivityManager,
     terminalMethodChannel: MethodChannel
@@ -127,7 +122,6 @@ fun EditorContent(
 
             if (showBottomSheet) {
                 BottomSheet(
-                    projectInfo = projectInfo,
                     viewModel = viewModel,
                     localActivityManager = localActivityManager,
                     terminalMethodChannel = terminalMethodChannel
@@ -145,7 +139,6 @@ private enum class SelectedFilesList {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BottomSheet(
-    projectInfo: ProjectInfo,
     viewModel: EditorViewModel,
     localActivityManager: LocalActivityManager,
     terminalMethodChannel: MethodChannel,
@@ -232,7 +225,7 @@ fun BottomSheet(
                                         contentColor = MaterialTheme.colorScheme.primary,
                                         containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
                                         onClick = {
-                                            viewModel.openFile(context = context, path = path)
+                                            viewModel.openFile(path = path)
                                         })
                                 } else {
                                     PathCard(modifier = Modifier
@@ -242,7 +235,7 @@ fun BottomSheet(
                                         contentColor = MaterialTheme.colorScheme.secondary,
                                         path = path,
                                         onClick = {
-                                            viewModel.openFile(context = context, path = path)
+                                            viewModel.openFile(path = path)
                                         })
                                 }
                             }
@@ -292,7 +285,7 @@ fun BottomSheet(
                                 if (path.isDirectory()) {
                                     viewModel.setLeftFilesPath(path = path)
                                 } else {
-                                    viewModel.openFile(context = context, path = path)
+                                    viewModel.openFile(path = path)
                                 }
                             },
                             onLongClick = {
@@ -310,7 +303,7 @@ fun BottomSheet(
                                 if (path.isDirectory()) {
                                     viewModel.setRightFilesPath(path = path)
                                 } else {
-                                    viewModel.openFile(context = context, path = path)
+                                    viewModel.openFile(path = path)
                                 }
                             },
                             onLongClick = {

@@ -107,7 +107,7 @@ class EditorViewModel(private val projectInfo: ProjectInfo) : ViewModel() {
         }
     }
 
-    fun openFile(context: Context, path: Path) {
+    fun openFile(path: Path) {
         if (currentOpenedFile == path) {
             return
         } else if (_currentOpenedFile.value != null) {
