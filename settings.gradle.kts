@@ -2,7 +2,7 @@ import java.io.FileReader
 import java.util.Properties
  
  val properties = Properties().apply {
-     load(FileReader("terminal_view\\.android\\local.properties"))
+     load(FileReader("terminal_view/.android/local.properties"))
  }
  
  val flutterSdkPath = properties.getProperty("flutter.sdk")
