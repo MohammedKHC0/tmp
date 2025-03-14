@@ -39,6 +39,9 @@ jobs:
       
     - name: Cargo
       run: cargo
+      
+    - name: Ls
+      run: cd ./terminal_view && flutter pub get && ls .android && cd ..
     
     - name: Build with Gradle
       run: ./gradlew assembleRelease
