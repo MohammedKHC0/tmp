@@ -28,7 +28,7 @@ jobs:
         version: 3.0.2
 
     - name: Setup Rust
-    - uses: moonrepo/setup-rust@v1
+      uses: moonrepo/setup-rust@v1
 
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
