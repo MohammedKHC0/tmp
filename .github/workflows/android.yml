@@ -35,8 +35,13 @@ jobs:
     - name: Setup Ndk
       uses: nttld/setup-ndk@v1
       with:
+        ndk-version: r27
         link-to-sdk: true
-        ndk-version: r27b
+    - name: Setup Ndk
+      uses: nttld/setup-ndk@v1
+      with:
+        ndk-version: r28
+        link-to-sdk: true
         
     - name: Flutter
       run: flutter -v doctor
