@@ -21,6 +21,15 @@ jobs:
         distribution: 'zulu'
         cache: gradle
 
+    - name: Setup Flutter SDK
+      uses: flutter-actions/setup-flutter@v4
+      with:
+        channel: stable
+        version: 3.0.2
+
+    - name: Setup Rust
+    - uses: moonrepo/setup-rust@v1
+
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
     - name: Build with Gradle
