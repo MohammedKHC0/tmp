@@ -32,6 +32,14 @@ jobs:
 
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
+
+        
+    - name: Flutter
+      run: flutter -v doctor
+      
+    - name: Cargo
+      run: cargo
+    
     - name: Build with Gradle
       run: ./gradlew assembleRelease
     - name: Upload APK Debug - ${{ env.repository_name }}
