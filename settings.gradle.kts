@@ -1,18 +1,3 @@
-import java.io.FileReader
-import java.util.Properties
- 
- val properties = Properties().apply {
-     load(FileReader("terminal_view/.android/local.properties"))
- }
- 
- val flutterSdkPath = properties.getProperty("flutter.sdk")
- assert(flutterSdkPath != null) {
-     "flutter.sdk not set in local.properties"
-}
-
-settings.extra.set("flutterSdkPath", flutterSdkPath)
-includeBuild("${settings.extra.get("flutterSdkPath")}/packages/flutter_tools/gradle")
-
 pluginManagement {
     repositories {
         google {
@@ -41,6 +26,7 @@ dependencyResolutionManagement {
 
 rootProject.name = "Codroid"
 include(":app", ":sora-editor-lsp")
-apply {
-    from("flutter_settings.gradle")
-}
+// Replace "flutter_module" with whatever package_name you supplied when you ran:
+// `$ flutter create -t module [package_name]
+val filePath = settingsDir.parentFile.toString() + "/terminal_view/.android/include_flutter.groovy"
+apply(from = File(filePath))
